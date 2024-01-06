@@ -1,15 +1,15 @@
-import { Request, Response } from '../lib';
-import createServer, { ConsumeServer } from '../lib/server';
+import * as http from 'http';
+import { ConsumeServer, Response } from '../lib';
+import createServer from '../lib/server';
 
 const server: ConsumeServer = createServer({
   port: 3000
 });
 
-server.get('/test', (request: Request, response: Response) => {
-  response.writeHead(200, { 'Content-Type': 'text/plain' });
-  response.end('Example response!');
+server.get('/test', (request: http.IncomingMessage, response: Response) => {
+  response.reply(200, { message: Math.random() });
 });
 
-server.init(() => {
-  console.log('test');
+server.start(() => {
+  console.log('Test API is live!');
 });
