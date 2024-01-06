@@ -1,19 +1,26 @@
 import * as http from 'http';
-
-/** Incoming Requests */
-export type Request = http.IncomingMessage;
-
-/** Outgoing Responses */
-export type Response = http.ServerResponse;
+import { Response } from '../wrapper/response';
 
 /** A controller function */
-export type Controller = (request: Request, response: Response) => void;
+export type Controller = (request: http.IncomingMessage, response: Response) => void;
 
 /** A middleware function */
-export type Middleware = (request: Request, response: Response, controller: Controller) => void;
+export type Middleware = (
+  request: http.IncomingMessage,
+  response: Response,
+  controller: Controller
+) => void;
 
 /** Optional Settings for a Consume server */
 export type ServerOptions = {
   port: number;
   useSecureHeaders?: boolean;
+};
+
+/** The methods to support */
+export type HttpMethod = 'GET' | 'POST' | 'PUT';
+
+/** The definitions of a route */
+export type Route = {
+  [key: string]: Map<HttpMethod, Controller>;
 };
