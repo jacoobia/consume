@@ -7,9 +7,9 @@ const server: ConsumeServer = createServer({
 });
 
 server.get('/test', (request: http.IncomingMessage, response: Response) => {
-  response.reply(200, 'test!');
+  response.reply(200, { message: Math.random() });
 });
 
 server.start(() => {
-  console.log('test');
+  console.log('Test API is live!');
 });

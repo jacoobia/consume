@@ -1,10 +1,15 @@
 import * as http from 'http';
 
+export type Header = string | number | readonly string[];
+
 /** The methods to support */
 export type HttpMethod = 'GET' | 'POST' | 'PUT';
 
 /** A controller function */
 export type Controller = (request: http.IncomingMessage, response: Response) => void;
+
+/** A function passed down the chain in the middleware process */
+export type ChainedFunction = () => void | Controller;
 
 /**
  * A ConsumeServer
@@ -16,30 +21,6 @@ export interface ConsumeServer {
    * @param {Middleware} middleware The middleware function to use
    */
   use(middleware: Middleware): void;
-
-  /**
-   * If the endpoint definition doesn't exist, we want to handle it
-   * gracefully rather than throwing an exception
-   * @param {string} url The target 'endpoint'
-   * @param {string} method The HTTP Method type
-   * @param {Response} response The request object to send
-   */
-  reject(url: string, method: string, response: Response): void;
-
-  /**
-   * Runs through the available middlewares and chain executes them,
-   * then finally passes it onto the controller
-   * @param {number} index the index of the middleware to run
-   * @param {http.IncomingMessage} request The incoming incoming
-   * @param {Response} response The wrapped response
-   * @param {Controller} controller The controller to forward the request onto
-   */
-  runMiddleware(
-    index: number,
-    request: http.IncomingMessage,
-    response: Response,
-    nextFunction: () => void | Controller
-  ): void;
 
   /**
    * Define a handler for GET requests to a specific endpoint
@@ -67,8 +48,19 @@ export interface ConsumeServer {
  * The HTTP response to send back to a client
  */
 export interface Response {
+  /**
+   * Sends a message back to the client a request came from
+   * @param statusCode The HTTP status code for the response
+   * @param body The body to send back to the clinet
+   */
   reply(statusCode: number, body: unknown): void;
-  setHeader(name: string, value: string | number | readonly string[]): void;
+
+  /**
+   * Set a header for a http response for a client
+   * @param {string} name The name of the header
+   * @param {Header} value The value to set the header to
+   */
+  setHeader(name: string, value: Header): void;
 }
 
 /** A middleware function */

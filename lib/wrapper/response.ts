@@ -8,7 +8,7 @@ class ConsumeResponse implements Response {
     this.response = response;
   }
 
-  public reply(statusCode: number, body: JSON): void {
+  public reply(statusCode: number, body: unknown): void {
     this.response.writeHead(statusCode, { 'Content-Type': 'application/json' });
     this.response.end(JSON.stringify(body));
   }
@@ -17,4 +17,5 @@ class ConsumeResponse implements Response {
     this.response.setHeader(name, value);
   }
 }
+
 export default ConsumeResponse;

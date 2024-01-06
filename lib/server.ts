@@ -9,6 +9,8 @@ import {
   Response
 } from './@types/index';
 
+// TODO: Add routers that allow for sub routes
+
 class Server implements ConsumeServer {
   /** The actual server */
   private server: http.Server;
@@ -23,6 +25,7 @@ class Server implements ConsumeServer {
   private middleware: Middleware[] = [];
 
   constructor(options: ServerOptions = { port: 3000 }) {
+    this.serverOptions = options;
     this.server = http.createServer((req, res) => this.handleRequest(req, res));
 
     if (options.useSecureHeaders) {
@@ -39,51 +42,81 @@ class Server implements ConsumeServer {
     });
   }
 
+  /**
+   * Wrap the request and response with the easy-use Consumer API wrapped,
+   * run the middleware process and process down the pipeline to the target
+   * function
+   * @param {http.IncomingMessage} request the incoming request
+   * @param {http.ServerResponse} response the outgoing response
+   */
   private handleRequest(request: http.IncomingMessage, response: http.ServerResponse) {
     // Extract the method
     const method: string = request.method!;
     const url: string = request.url!;
-    console.log(`${method} \\${url}`);
 
     //TODO: wrap the request
 
     //Wrap the response
     const wrappedResponse: Response = new ConsumeResponse(response);
 
-    this.routes.forEach((route: RouteDefinition) => {
+    for (const route of this.routes) {
       if (route.endpoint === url) {
         if (route.method === method) {
-          this.runMiddleware(
-            0,
-            request,
-            wrappedResponse,
-            route.controller(request, wrappedResponse)
-          );
+          this.runMiddleware(0, request, wrappedResponse, route.controller);
           return;
         } else {
-          wrappedResponse.reply(500, `Could not ${method} \\${url}`);
+          this.methodMismatchRejection(url, method, wrappedResponse);
+          return;
         }
       }
-    });
+    }
 
-    this.reject(url, method, wrappedResponse);
+    this.undefinedRejection(url, method, wrappedResponse);
   }
 
+  /**
+   * Recursively runs through the available middlewares and chain executes them,
+   * then finally passes it onto the controller
+   * @param {number} index the index of the middleware to run
+   * @param {http.IncomingMessage} request The incoming incoming
+   * @param {Response} response The wrapped response
+   * @param {Controller} controller The controller to forward the request onto
+   */
   private runMiddleware(
     index: number,
     request: http.IncomingMessage,
     response: Response,
-    nextFunction: () => void | Controller
+    controller: Controller
   ) {
     if (index < this.middleware.length) {
       this.middleware[index](request, response, () =>
-        this.runMiddleware(index + 1, request, response, nextFunction)
+        this.runMiddleware(index + 1, request, response, controller)
       );
-    } else nextFunction(request, response);
+    } else controller(request, response);
   }
 
-  private reject(url: string, method: string, response: Response) {
+  /**
+   * If the endpoint definition doesn't exist, we want to handle it
+   * gracefully rather than throwing an exception
+   * @param {string} url The target endpoint
+   * @param {string} method The HTTP Method type
+   * @param {Response} response The request object to send
+   */
+  private undefinedRejection(url: string, method: string, response: Response) {
+    console.log('frick');
     response.reply(404, { message: `No definition for ${method}:${url}` });
+  }
+
+  /**
+   * If the endpoint definition exists but the method does not match,
+   * the incoming request we want to handle it gracefully rather than
+   * throwing an exception
+   * @param {string} url The target endpoint
+   * @param {string} method The HTTP Method type
+   * @param {Response} response The request object to send
+   */
+  private methodMismatchRejection(url: string, method: string, response: Response) {
+    response.reply(405, `Could not ${method} ${url}`);
   }
 
   public use(middleware: Middleware) {
