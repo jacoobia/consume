@@ -1,9 +1,5 @@
 import * as http from 'http';
-
-export interface Response {
-  reply(statusCode: number, body: JSON): void;
-  setHeader(name: string, value: string | number | readonly string[]): void;
-}
+import { Response } from '../@types';
 
 class ConsumeResponse implements Response {
   private response: http.ServerResponse;

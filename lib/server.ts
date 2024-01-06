@@ -1,31 +1,15 @@
 import * as http from 'http';
-import ConsumeResponse, { Response } from './wrapper/response';
-import { Controller, Middleware, Route, ServerOptions } from './@types/index';
+import ConsumeResponse from './wrapper/response';
+import {
+  ConsumeServer,
+  Controller,
+  Middleware,
+  RouteDefinition,
+  ServerOptions,
+  Response
+} from './@types/index';
 
-/** A ConsumeServer */
-export interface ConsumeServer {
-  /**
-   * Use a middleware function in the server processing pipeline
-   * @param {Middleware} middleware The middleware function to use
-   */
-  use(middleware: Middleware): void;
-
-  /**
-   * Define a handler for GET requests to a specific endpoint
-   * @param {string} endpoint The endpoint for which the handler is defined
-   * @param {Controller} controller The function to handle the GET request
-   */
-  get(endpoint: string, controller: Controller): void;
-
-  /**
-   * Starts the http server listening on the port supplied in the
-   * options, or 3000 if not supplied
-   * @param {void} callback An optional callback function
-   */
-  start(callback?: () => void): void;
-}
-
-class Server {
+class Server implements ConsumeServer {
   /** The actual server */
   private server: http.Server;
 
@@ -33,8 +17,9 @@ class Server {
   private serverOptions: ServerOptions;
 
   /** The defined routes */
-  private routes: Route[] = [];
+  private routes: RouteDefinition[] = [];
 
+  /** The defined middlewares */
   private middleware: Middleware[] = [];
 
   constructor(options: ServerOptions = { port: 3000 }) {
@@ -45,6 +30,7 @@ class Server {
     }
   }
 
+  // TODO: Inject HTTP security headers whenever responses are sent
   private buildHeaders() {
     this.use((request: http.IncomingMessage, response: Response, controller: Controller) => {
       response.setHeader('X-Content-Type-Options', 'nosniff');
@@ -53,52 +39,71 @@ class Server {
     });
   }
 
-  public listen(port: number, callback?: () => void): void {
-    this.server.listen(port, callback);
-  }
-
   private handleRequest(request: http.IncomingMessage, response: http.ServerResponse) {
-    const method = request.method?.toLowerCase();
-    console.log(method);
+    // Extract the method
+    const method: string = request.method!;
+    const url: string = request.url!;
+    console.log(`${method} \\${url}`);
+
+    //TODO: wrap the request
+
+    //Wrap the response
     const wrappedResponse: Response = new ConsumeResponse(response);
-    const controller = this.routes.get(request.url || '') || this.defaultController;
-    this.runMiddleware(0, request, wrappedResponse, controller(request, wrappedResponse));
+
+    this.routes.forEach((route: RouteDefinition) => {
+      if (route.endpoint === url) {
+        if (route.method === method) {
+          this.runMiddleware(
+            0,
+            request,
+            wrappedResponse,
+            route.controller(request, wrappedResponse)
+          );
+          return;
+        } else {
+          wrappedResponse.reply(500, `Could not ${method} \\${url}`);
+        }
+      }
+    });
+
+    this.reject(url, method, wrappedResponse);
   }
 
   private runMiddleware(
     index: number,
     request: http.IncomingMessage,
     response: Response,
-    next: () => void
+    nextFunction: () => void | Controller
   ) {
     if (index < this.middleware.length) {
       this.middleware[index](request, response, () =>
-        this.runMiddleware(index + 1, request, response, next)
+        this.runMiddleware(index + 1, request, response, nextFunction)
       );
-    } else {
-      next();
-    }
+    } else nextFunction(request, response);
+  }
+
+  private reject(url: string, method: string, response: Response) {
+    response.reply(404, { message: `No definition for ${method}:${url}` });
   }
 
   public use(middleware: Middleware) {
     this.middleware.push(middleware);
   }
 
-  public get(endpoint: string, callback: Controller) {
-    this.routes.set(endpoint, callback);
+  public get(endpoint: string, controller: Controller) {
+    this.routes.push({
+      method: 'GET',
+      endpoint,
+      controller
+    });
   }
 
-  // public post(endpoint: string, callback: Controller) {
-  //   this.routes.post.set(endpoint, callback);
-  // }
-
-  // public put(endpoint: string, callback: Controller) {
-  //   this.routes.put.set(endpoint, callback);
-  // }
-
-  private defaultController(req: http.IncomingMessage, res: http.ServerResponse) {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
+  public post(endpoint: string, controller: Controller) {
+    this.routes.push({
+      method: 'POST',
+      endpoint,
+      controller
+    });
   }
 
   public start(callback: () => void) {
