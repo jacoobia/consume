@@ -112,13 +112,11 @@ const users: User[] = [
 
 const server: ConsumeServer = createServer({
   port: 3000,
-  useSecureHeaders: true
+  useSecureHeaders: true,
+  logRequests: true
 });
 
 server.get('/users', (request: Request, response: Response) => {
-  console.log(request.body);
-  console.log(request.searchParams);
-  console.log(request.urlParams);
   response.reply(200, { users });
 });
 

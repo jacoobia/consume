@@ -22,6 +22,7 @@ export type Middleware = (request: Request, response: Response, controller: Cont
 export type ServerOptions = {
   port: number;
   useSecureHeaders?: boolean;
+  logRequests?: boolean;
 };
 
 /** The definitions of a route */

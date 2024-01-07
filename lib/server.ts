@@ -49,7 +49,7 @@ class Server implements ConsumeServer {
     const method: string = request.method!; //TODO: Read any url params and store them in the request wrapper
     const url: string = request.url!.split('?')[0]; // Gross inline string manipiulation to account for url?query=params
 
-    const wrappedRequest: Request = new ConsumeRequest(request);
+    const wrappedRequest: Request = new ConsumeRequest(request, this.serverOptions.logRequests);
     const wrappedResponse: Response = new ConsumeResponse(response);
 
     wrappedRequest.parse().then(() => {

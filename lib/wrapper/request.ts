@@ -9,8 +9,11 @@ class ConsumeRequest implements Request {
   public urlParams: UrlParams;
   public body: RequestBody;
 
-  constructor(request: http.IncomingMessage) {
+  private logRequests: boolean;
+
+  constructor(request: http.IncomingMessage, logRequests: boolean = false) {
     this.request = request;
+    this.logRequests = logRequests;
     this.searchParams = {};
     this.urlParams = {};
     this.body = {};
@@ -20,6 +23,23 @@ class ConsumeRequest implements Request {
   public async parse(): Promise<void> {
     this.searchParams = parseSearchParams(this.fullUrl());
     await this.readBody();
+    this.requestLogging();
+  }
+
+  private requestLogging() {
+    if (this.logRequests) {
+      const message = {
+        url: this.fullUrl(),
+        endpoint: this.request.url!,
+        method: this.request.method!,
+        source: this.request.socket.remoteAddress,
+        headers: this.request.headers,
+        searchParams: this.searchParams,
+        urlParam: this.urlParams,
+        body: this.body
+      };
+      console.log(message);
+    }
   }
 
   private readUrlParams(): void {
