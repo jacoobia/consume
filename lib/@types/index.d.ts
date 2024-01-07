@@ -1,15 +1,35 @@
-import * as http from 'http';
-
-export type Header = string | number | readonly string[];
+export type Header = string | number | string[];
 
 /** The methods to support */
 export type HttpMethod = 'GET' | 'POST' | 'PUT';
 
+/** An object of search params */
+export type UrlParams = { [key: string]: string };
+
+/** A body json object */
+export type RequestBody = { [key: string]: string | number | boolean };
+
 /** A controller function */
-export type Controller = (request: http.IncomingMessage, response: Response) => void;
+export type Controller = (request: Request, response: Response) => void;
 
 /** A function passed down the chain in the middleware process */
 export type ChainedFunction = () => void | Controller;
+
+/** A middleware function */
+export type Middleware = (request: Request, response: Response, controller: Controller) => void;
+
+/** Optional Settings for a Consume server */
+export type ServerOptions = {
+  port: number;
+  useSecureHeaders?: boolean;
+};
+
+/** The definitions of a route */
+export type RouteDefinition = {
+  endpoint: string;
+  method: HttpMethod;
+  controller: Controller;
+};
 
 /**
  * A ConsumeServer
@@ -63,22 +83,26 @@ export interface Response {
   setHeader(name: string, value: Header): void;
 }
 
-/** A middleware function */
-export type Middleware = (
-  request: http.IncomingMessage,
-  response: Response,
-  controller: Controller
-) => void;
+export interface Request {
+  /**
+   * The URL search params if they exist
+   */
+  searchParams: UrlParams;
 
-/** Optional Settings for a Consume server */
-export type ServerOptions = {
-  port: number;
-  useSecureHeaders?: boolean;
-};
+  urlParams: UrlParams;
 
-/** The definitions of a route */
-export type RouteDefinition = {
-  endpoint: string;
-  method: HttpMethod;
-  controller: Controller;
-};
+  /**
+   * The Request body if it exists
+   */
+  body: RequestBody;
+
+  /**
+   * Parses the request data (body, query, param etc)
+   */
+  parse(): Promise<void>;
+
+  /**
+   * Returns the full URL including the host
+   */
+  fullUrl(): string;
+}

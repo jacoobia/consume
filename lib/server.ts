@@ -6,10 +6,11 @@ import {
   Middleware,
   RouteDefinition,
   ServerOptions,
-  Response
+  Response,
+  Request
 } from './@types/index';
-
-// TODO: Add routers that allow for sub routes
+import ConsumeRequest from './wrapper/request';
+import security from './security/securityMiddleware';
 
 class Server implements ConsumeServer {
   /** The actual server */
@@ -26,20 +27,15 @@ class Server implements ConsumeServer {
 
   constructor(options: ServerOptions = { port: 3000 }) {
     this.serverOptions = options;
-    this.server = http.createServer((req, res) => this.handleRequest(req, res));
+    this.server = http.createServer(
+      (request: http.IncomingMessage, response: http.ServerResponse) =>
+        this.handleRequest(request, response)
+    );
 
+    //Inject the basic security headers
     if (options.useSecureHeaders) {
-      this.buildHeaders();
+      security(this);
     }
-  }
-
-  // TODO: Inject HTTP security headers whenever responses are sent
-  private buildHeaders() {
-    this.use((request: http.IncomingMessage, response: Response, controller: Controller) => {
-      response.setHeader('X-Content-Type-Options', 'nosniff');
-      response.setHeader('X-Frame-Options', 'SAMEORIGIN');
-      controller(request, response);
-    });
   }
 
   /**
@@ -49,45 +45,44 @@ class Server implements ConsumeServer {
    * @param {http.IncomingMessage} request the incoming request
    * @param {http.ServerResponse} response the outgoing response
    */
-  private handleRequest(request: http.IncomingMessage, response: http.ServerResponse) {
-    // Extract the method
-    const method: string = request.method!;
-    const url: string = request.url!;
+  private handleRequest(request: http.IncomingMessage, response: http.ServerResponse): void {
+    const method: string = request.method!; //TODO: Read any url params and store them in the request wrapper
+    const url: string = request.url!.split('?')[0]; // Gross inline string manipiulation to account for url?query=params
 
-    //TODO: wrap the request
-
-    //Wrap the response
+    const wrappedRequest: Request = new ConsumeRequest(request);
     const wrappedResponse: Response = new ConsumeResponse(response);
 
-    for (const route of this.routes) {
-      if (route.endpoint === url) {
-        if (route.method === method) {
-          this.runMiddleware(0, request, wrappedResponse, route.controller);
-          return;
-        } else {
-          this.methodMismatchRejection(url, method, wrappedResponse);
-          return;
+    wrappedRequest.parse().then(() => {
+      for (const route of this.routes) {
+        if (route.endpoint === url) {
+          if (route.method === method) {
+            this.runMiddleware(0, wrappedRequest, wrappedResponse, route.controller);
+            return;
+          } else {
+            this.methodMismatchRejection(url, method, route.method, wrappedResponse);
+            return;
+          }
         }
       }
-    }
 
-    this.undefinedRejection(url, method, wrappedResponse);
+      this.undefinedRejection(url, method, wrappedResponse);
+    });
   }
 
   /**
    * Recursively runs through the available middlewares and chain executes them,
    * then finally passes it onto the controller
    * @param {number} index the index of the middleware to run
-   * @param {http.IncomingMessage} request The incoming incoming
+   * @param {Request} request The incoming incoming
    * @param {Response} response The wrapped response
    * @param {Controller} controller The controller to forward the request onto
    */
   private runMiddleware(
     index: number,
-    request: http.IncomingMessage,
+    request: Request,
     response: Response,
     controller: Controller
-  ) {
+  ): void {
     if (index < this.middleware.length) {
       this.middleware[index](request, response, () =>
         this.runMiddleware(index + 1, request, response, controller)
@@ -102,8 +97,7 @@ class Server implements ConsumeServer {
    * @param {string} method The HTTP Method type
    * @param {Response} response The request object to send
    */
-  private undefinedRejection(url: string, method: string, response: Response) {
-    console.log('frick');
+  private undefinedRejection(url: string, method: string, response: Response): void {
     response.reply(404, { message: `No definition for ${method}:${url}` });
   }
 
@@ -112,18 +106,28 @@ class Server implements ConsumeServer {
    * the incoming request we want to handle it gracefully rather than
    * throwing an exception
    * @param {string} url The target endpoint
-   * @param {string} method The HTTP Method type
+   * @param {string} requestedMethod The HTTP Method type requested
+   * @param {string} requiredMethod The HTTP Method type required
    * @param {Response} response The request object to send
    */
-  private methodMismatchRejection(url: string, method: string, response: Response) {
-    response.reply(405, `Could not ${method} ${url}`);
+  private methodMismatchRejection(
+    url: string,
+    requestedMethod: string,
+    requiredMethod: string,
+    response: Response
+  ): void {
+    response.reply(405, `Could not ${requestedMethod} ${url}, use ${requiredMethod} instead`);
   }
 
-  public use(middleware: Middleware) {
+  private stripUrlParam() {
+    //TODO:
+  }
+
+  public use(middleware: Middleware): void {
     this.middleware.push(middleware);
   }
 
-  public get(endpoint: string, controller: Controller) {
+  public get(endpoint: string, controller: Controller): void {
     this.routes.push({
       method: 'GET',
       endpoint,
@@ -131,7 +135,7 @@ class Server implements ConsumeServer {
     });
   }
 
-  public post(endpoint: string, controller: Controller) {
+  public post(endpoint: string, controller: Controller): void {
     this.routes.push({
       method: 'POST',
       endpoint,
@@ -139,7 +143,7 @@ class Server implements ConsumeServer {
     });
   }
 
-  public start(callback: () => void) {
+  public start(callback: () => void): void {
     this.server.listen(this.serverOptions.port, callback);
   }
 }
