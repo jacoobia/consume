@@ -81,7 +81,7 @@ class Server implements ConsumeServer {
    * @param {number} index the index of the middleware to run
    * @param {Request} request The incoming incoming
    * @param {Response} response The wrapped response
-   * @param {Controller} controller The controller to forward the request onto
+   * @param {RouteDefinition} route The route definition to forward the request onto
    */
   private runMiddleware(
     index: number,
