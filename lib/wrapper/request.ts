@@ -17,7 +17,6 @@ class ConsumeRequest implements Request {
     this.searchParams = {};
     this.urlParams = {};
     this.body = {};
-    this.readBody();
   }
 
   public parseBody<T>(): T {
@@ -32,10 +31,15 @@ class ConsumeRequest implements Request {
     return this.searchParams as T;
   }
 
-  public async parse(): Promise<void> {
-    this.searchParams = parseSearchParams(this.fullUrl());
-    await this.readBody();
-    this.requestLogging();
+  public async parse(): Promise<boolean> {
+    try {
+      this.searchParams = parseSearchParams(this.fullUrl());
+      await this.readBody();
+      this.requestLogging();
+    } catch (error: unknown) {
+      return false;
+    }
+    return true;
   }
 
   private requestLogging() {
@@ -56,8 +60,24 @@ class ConsumeRequest implements Request {
 
   private readUrlParams(): void {
     //TODO:
+    /**
+     * A simple way to implement this could be...
+     * /example/:id
+     * /example/1001
+     *
+     * 1. Split BOTH by /
+     * 2. Find the index of each string begging with : in the endpoint definition
+     * 3. Grab the data at that index on the request url
+     * 4. Assign the data to a variable of the assigned name (maybe try and parse too)
+     */
   }
 
+  /**
+   * Reads the data coming through chunk by chunk and appends
+   * it to a body variable. Once all chunks have been appended,
+   * it gets parsed with JSON
+   * @returns {Promise<void>} async promise
+   */
   private readBody(): Promise<void> {
     return new Promise((resolve, reject) => {
       let body = '';
@@ -69,15 +89,13 @@ class ConsumeRequest implements Request {
         try {
           if (body.length > 0) this.body = JSON.parse(body);
           resolve();
-        } catch (e) {
-          console.error('Error parsing JSON:', e);
-          reject(e);
+        } catch (error: unknown) {
+          reject(error);
         }
       });
 
-      this.request.on('error', (err) => {
-        console.error('Error reading the request body:', err);
-        reject(err);
+      this.request.on('error', (error: unknown) => {
+        reject(error);
       });
     });
   }

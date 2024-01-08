@@ -7,10 +7,12 @@ import {
   RouteDefinition,
   ServerOptions,
   Response,
-  Request
+  Request,
+  StatusCodes
 } from './@types/index';
 import ConsumeRequest from './wrapper/request';
 import security from './security/securityMiddleware';
+import { isMiddleware } from './util/function';
 
 class Server implements ConsumeServer {
   /** The actual server */
@@ -52,11 +54,15 @@ class Server implements ConsumeServer {
     const wrappedRequest: Request = new ConsumeRequest(request, this.serverOptions.logRequests);
     const wrappedResponse: Response = new ConsumeResponse(response);
 
-    wrappedRequest.parse().then(() => {
+    wrappedRequest.parse().then((success: boolean) => {
+      if (!success) {
+        return wrappedResponse.reply(StatusCodes.BadRequest, { message: 'Malformed JSON body' });
+      }
+
       for (const route of this.routes) {
         if (route.endpoint === url) {
           if (route.method === method) {
-            this.runMiddleware(0, wrappedRequest, wrappedResponse, route.controller);
+            this.runMiddleware(0, wrappedRequest, wrappedResponse, route);
             return;
           } else {
             this.methodMismatchRejection(url, method, route.method, wrappedResponse);
@@ -81,13 +87,17 @@ class Server implements ConsumeServer {
     index: number,
     request: Request,
     response: Response,
-    controller: Controller
+    route: RouteDefinition
   ): void {
     if (index < this.middleware.length) {
       this.middleware[index](request, response, () =>
-        this.runMiddleware(index + 1, request, response, controller)
+        this.runMiddleware(index + 1, request, response, route)
       );
-    } else controller(request, response);
+    } else {
+      if (route.preflight) {
+        route.preflight(request, response, route.controller);
+      } else route.controller(request, response);
+    }
   }
 
   /**
@@ -98,7 +108,7 @@ class Server implements ConsumeServer {
    * @param {Response} response The request object to send
    */
   private undefinedRejection(url: string, method: string, response: Response): void {
-    response.reply(404, { message: `No definition for ${method}:${url}` });
+    response.reply(StatusCodes.NotFound, { message: `No definition for ${method}:${url}` });
   }
 
   /**
@@ -116,7 +126,10 @@ class Server implements ConsumeServer {
     requiredMethod: string,
     response: Response
   ): void {
-    response.reply(405, `Could not ${requestedMethod} ${url}, use ${requiredMethod} instead`);
+    response.reply(
+      StatusCodes.MethodNotAllowed,
+      `Could not ${requestedMethod} ${url}, use ${requiredMethod} instead`
+    );
   }
 
   private stripUrlParam() {
@@ -127,21 +140,52 @@ class Server implements ConsumeServer {
     this.middleware.push(middleware);
   }
 
-  public get(endpoint: string, controller: Controller): void {
+  public get(
+    endpoint: string,
+    preflightOrController: Middleware | Controller,
+    controller?: Controller
+  ): void {
     this.routes.push({
       method: 'GET',
       endpoint,
-      controller
+      ...(isMiddleware(preflightOrController)
+        ? { preflight: preflightOrController as Middleware, controller: controller as Controller }
+        : { controller: preflightOrController as Controller })
     });
   }
 
-  public post(endpoint: string, controller: Controller): void {
+  public post(
+    endpoint: string,
+    preflightOrController: Middleware | Controller,
+    controller?: Controller
+  ): void {
     this.routes.push({
       method: 'POST',
       endpoint,
-      controller
+      ...(isMiddleware(preflightOrController)
+        ? { preflight: preflightOrController as Middleware, controller: controller as Controller }
+        : { controller: preflightOrController as Controller })
     });
   }
+
+  // public get(endpoint: string, preflightOrController: Middleware | Controller, controller?: Controller): void {
+  //   let preflight: Middleware | undefined;
+  //   this.routes.push({
+  //     method: 'GET',
+  //     endpoint,
+  //     controller,
+  //     preflight
+  //   });
+  // }
+
+  // public post(endpoint: string, preflight: Middleware = null, controller: Controller): void {
+  //   this.routes.push({
+  //     method: 'POST',
+  //     endpoint,
+  //     controller,
+  //     preflight
+  //   });
+  // }
 
   public start(callback: () => void): void {
     this.server.listen(this.serverOptions.port, callback);

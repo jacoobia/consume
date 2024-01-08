@@ -1,11 +1,27 @@
-import { createServer, ConsumeServer, Request, Response, StatusCodes } from '../dist';
+import {
+  createServer,
+  ConsumeServer,
+  Request,
+  Response,
+  StatusCodes,
+  Middleware,
+  validator,
+  StringValidator,
+  NumberValidator
+} from '../dist';
 import { User } from './@types';
 import { addUser, getUsers } from './service/userService';
 
 const server: ConsumeServer = createServer({
   port: 3000,
   useSecureHeaders: true,
-  logRequests: true
+  logRequests: false
+});
+
+const validation: Middleware = validator({
+  firstname: StringValidator(),
+  surname: StringValidator(),
+  age: NumberValidator()
 });
 
 server.get('/users', (request: Request, response: Response) => {
@@ -13,7 +29,7 @@ server.get('/users', (request: Request, response: Response) => {
   response.reply(StatusCodes.Ok, { users });
 });
 
-server.post('/addUser', (request: Request, response: Response) => {
+server.post('/addUser', validation, (request: Request, response: Response) => {
   const user: User = request.parseBody<User>();
   const success: boolean = addUser(user);
   response.reply(StatusCodes.Ok, {

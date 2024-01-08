@@ -51,7 +51,26 @@ export type RouteDefinition = {
   endpoint: string;
   method: HttpMethod;
   controller: Controller;
+  preflight?: Middleware;
 };
+
+/** A validator */
+export type ElementValidator = {
+  validate: (object: unknown) => boolean;
+  optional?: boolean;
+};
+
+/** Options for validators */
+export type ValidatorOptions = {
+  noExtraElements?: boolean;
+  errorListName?: string;
+};
+
+/** A validation functopn */
+export type ValidatorFunction = (() => ElementValidator) & { optional: () => ElementValidator };
+
+/** Validation error response */
+export type ValidatorError = Record<string, string>;
 
 /**
  * A ConsumeServer
@@ -67,9 +86,25 @@ export interface ConsumeServer {
   /**
    * Define a handler for GET requests to a specific endpoint
    * @param {string} endpoint The endpoint for which the handler is defined
+   * @param {Middleware} preflight A personal preflight for this endpoint
+   * @param {Controller} controller The function to handle the GET request
+   */
+  get(endpoint: string, preflight: Middleware, controller: Controller): void;
+
+  /**
+   * Define a handler for GET requests to a specific endpoint
+   * @param {string} endpoint The endpoint for which the handler is defined
    * @param {Controller} controller The function to handle the GET request
    */
   get(endpoint: string, controller: Controller): void;
+
+  /**
+   * Define a handler for POST requests to a specific endpoint
+   * @param {string} endpoint The endpoint for which the handler is defined
+   * @param {Middleware} preflight A personal preflight for this endpoint
+   * @param {Controller} controller The function to handle the POST request
+   */
+  post(endpoint: string, preflight: Middleware, controller: Controller): void;
 
   /**
    * Define a handler for POST requests to a specific endpoint
@@ -147,7 +182,7 @@ export interface Request {
    * Internal use only
    * Parses the request data (body, query, param etc)
    */
-  parse(): Promise<void>;
+  parse(): Promise<boolean>;
 
   /**
    * Returns the full URL including the host
