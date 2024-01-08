@@ -20,6 +20,18 @@ class ConsumeRequest implements Request {
     this.readBody();
   }
 
+  public parseBody<T>(): T {
+    return this.body as T;
+  }
+
+  public parseUrlParams<T>(): T {
+    return this.urlParams as T;
+  }
+
+  public parseSearchParams<T>(): T {
+    return this.searchParams as T;
+  }
+
   public async parse(): Promise<void> {
     this.searchParams = parseSearchParams(this.fullUrl());
     await this.readBody();
@@ -55,7 +67,7 @@ class ConsumeRequest implements Request {
 
       this.request.on('end', () => {
         try {
-          this.body = JSON.parse(body);
+          if (body.length > 0) this.body = JSON.parse(body);
           resolve();
         } catch (e) {
           console.error('Error parsing JSON:', e);

@@ -1,11 +1,15 @@
 import * as http from 'http';
-import { Response } from '../@types';
+import { Response, StatusCodes } from '../@types';
 
 class ConsumeResponse implements Response {
   private response: http.ServerResponse;
 
   constructor(response: http.ServerResponse) {
     this.response = response;
+  }
+
+  public forbidden(reason: string = 'Forbidden request'): void {
+    this.reply(StatusCodes.Forbidden, reason);
   }
 
   public reply(statusCode: number, body: unknown): void {
