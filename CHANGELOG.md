@@ -1,5 +1,11 @@
 # consume
 
+## 0.1.1
+
+### Patch Changes
+
+- 19bc9b9: unrestrict
+
 ## 0.1.0
 
 ### Minor Changes
