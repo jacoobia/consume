@@ -14,6 +14,7 @@ import {
 import ConsumeRequest from './wrapper/request';
 import security from './security/securityMiddleware';
 import { isMiddleware } from './util/function';
+import { parseUrlTokens } from './data/inbound';
 
 class Server implements ConsumeServer {
   /** The actual server */
@@ -60,52 +61,34 @@ class Server implements ConsumeServer {
         return wrappedResponse.reply(StatusCodes.BadRequest, { message: 'Malformed JSON body' });
       }
 
+      // Check for perfect URL and method match
       for (const route of this.endpoints) {
-        const { isMatch, params } = this.matchRoute(url, route.endpoint);
-        if (isMatch && route.method === method) {
-          wrappedRequest.urlParams = params;
+        if (route.endpoint === url && route.method === method) {
           this.runMiddleware(0, wrappedRequest, wrappedResponse, route);
           return;
-        } else if (isMatch) {
+        } else if (route.endpoint === url) {
           this.methodMismatchRejection(url, method, route.method, wrappedResponse);
           return;
         }
       }
 
+      // Check for URL parameter matches
+      for (const route of this.endpoints) {
+        const { isMatch, params } = parseUrlTokens(url, route.endpoint);
+        if (isMatch) {
+          if (route.method === method) {
+            wrappedRequest.urlParams = params;
+            this.runMiddleware(0, wrappedRequest, wrappedResponse, route);
+          } else {
+            this.methodMismatchRejection(url, method, route.method, wrappedResponse);
+          }
+          return;
+        }
+      }
+
+      // No matches found
       this.undefinedRejection(url, method, wrappedResponse);
     });
-  }
-
-  /**
-   * Uses ad route definition endpoint pattern to
-   * such as /users/:id/profile to match an incoming
-   * request and extract any tokens
-   * @param {string} requestedUrl The url from the request
-   * @param {string} routePattern The route pattern
-   * @returns
-   */
-  private matchRoute(
-    requestedUrl: string,
-    routePattern: string
-  ): { isMatch: boolean; params: { [key: string]: string } } {
-    const requestedParts = requestedUrl.split('/');
-    const patternParts = routePattern.split('/');
-    const params: { [key: string]: string } = {};
-
-    if (requestedParts.length !== patternParts.length) {
-      return { isMatch: false, params };
-    }
-
-    for (let i = 0; i < patternParts.length; i++) {
-      if (patternParts[i].startsWith(':')) {
-        const paramName = patternParts[i].substring(1);
-        params[paramName] = requestedParts[i];
-      } else if (requestedParts[i] !== patternParts[i]) {
-        return { isMatch: false, params };
-      }
-    }
-
-    return { isMatch: true, params };
   }
 
   /**

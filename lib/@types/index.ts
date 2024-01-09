@@ -7,6 +7,9 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT';
 /** An object of search params */
 export type UrlParams = { [key: string]: string };
 
+/** Details of an endpoints url param tokens matched to values */
+export type UrlParamMatch = { isMatch: boolean; params: { [key: string]: string } };
+
 /** A body json object */
 export type RequestBody = { [key: string]: string | number | boolean };
 

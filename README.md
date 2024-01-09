@@ -17,13 +17,18 @@ The project is essentially a big wrapper for the [NodeJS HTTP Library](https://n
 - Easy/clear developer experience
 - Fast and bloat-free
 
-### Basic features
+### features
 
-- Consume HTTP requests
-- Option to populate some default security headers
+- ~~Consume HTTP requests~~
+- ~~Option to populate some default security headers~~
+- ~~Request (http.IncomingMessage) wrapper with a simple api~~
+- ~~Response (http.ServerResponse) wrapper with a simple api~~
 - Support different body formats (JSON, xhr, form da(ta etc)
-- Built in scheme validation (can leverage the same method as my [SchemeIt library](https://github.com/jacoobia/schemeit))
-- Rate limiting
+- ~~In-built scheme validation (can leverage the same method as my [SchemeIt library](https://github.com/jacoobia/schemeit))~~
+- In-built Rate limiting
+- ~~Middlewares (optionally define them before the controller in the meth functions like ExpressJS)~~
+- Sending files in responses not just data
+- ~~Root 'routes' allowing logical breakdown of disciplines by files~~
 
 ## Setup for dev
 
@@ -36,7 +41,7 @@ pnpm i
 
 ## Running for local Dev
 
-There's an example usage class in this repo under the `./example/` folder. You can edit this to try out Aany new features you're working on and then run it with
+ConsumeJS comes with a bundled example project under under the `./example/` folder. You can edit this to try out Any new features you're working on and then run it with.
 
 ```
 pnpm run dev
