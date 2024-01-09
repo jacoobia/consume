@@ -4,11 +4,12 @@ import {
   ConsumeServer,
   Controller,
   Middleware,
-  RouteDefinition,
+  EndpointDefinition,
   ServerOptions,
   Response,
   Request,
-  StatusCodes
+  StatusCodes,
+  ConsumeRoute
 } from './@types/index';
 import ConsumeRequest from './wrapper/request';
 import security from './security/securityMiddleware';
@@ -21,8 +22,8 @@ class Server implements ConsumeServer {
   /** The options that configure the server */
   private serverOptions: ServerOptions;
 
-  /** The defined routes */
-  private routes: RouteDefinition[] = [];
+  /** The defined endpoints */
+  private endpoints: EndpointDefinition[] = [];
 
   /** The defined middlewares */
   private middleware: Middleware[] = [];
@@ -59,7 +60,7 @@ class Server implements ConsumeServer {
         return wrappedResponse.reply(StatusCodes.BadRequest, { message: 'Malformed JSON body' });
       }
 
-      for (const route of this.routes) {
+      for (const route of this.endpoints) {
         const { isMatch, params } = this.matchRoute(url, route.endpoint);
         if (isMatch && route.method === method) {
           wrappedRequest.urlParams = params;
@@ -113,13 +114,13 @@ class Server implements ConsumeServer {
    * @param {number} index The index of the middleware to run
    * @param {Request} request The incoming incoming
    * @param {Response} response The wrapped response
-   * @param {RouteDefinition} route The route definition to forward the request onto
+   * @param {EndpointDefinition} route The route definition to forward the request onto
    */
   private runMiddleware(
     index: number,
     request: Request,
     response: Response,
-    route: RouteDefinition
+    route: EndpointDefinition
   ): void {
     if (index < this.middleware.length) {
       this.middleware[index](request, response, () =>
@@ -168,12 +169,23 @@ class Server implements ConsumeServer {
     this.middleware.push(middleware);
   }
 
+  public route(root: string, route: ConsumeRoute): void {
+    route.getRoutes().forEach((endpoint: EndpointDefinition) => {
+      this.endpoints.push({
+        method: endpoint.method,
+        endpoint: `${root}${endpoint.endpoint}`,
+        controller: endpoint.controller,
+        preflight: endpoint.preflight
+      });
+    });
+  }
+
   public get(
     endpoint: string,
     preflightOrController: Middleware | Controller,
     controller?: Controller
   ): void {
-    this.routes.push({
+    this.endpoints.push({
       method: 'GET',
       endpoint,
       ...(isMiddleware(preflightOrController)
@@ -187,7 +199,7 @@ class Server implements ConsumeServer {
     preflightOrController: Middleware | Controller,
     controller?: Controller
   ): void {
-    this.routes.push({
+    this.endpoints.push({
       method: 'POST',
       endpoint,
       ...(isMiddleware(preflightOrController)
@@ -195,22 +207,6 @@ class Server implements ConsumeServer {
         : { controller: preflightOrController as Controller })
     });
   }
-
-  // DEPRECATED/REDACTED
-  // /**
-  //  * Extracts the URL param tokens which dictate where
-  //  * inline url params are
-  //  * @param endpoint
-  //  * @returns
-  //  */
-  // private extractUrlTokens(endpoint: string): UrlParamToken[] {
-  //   const parts: string[] = endpoint.split('/');
-  //   return parts
-  //     .map((part, index) =>
-  //       part.startsWith(':') ? { index: index, token: part.substring(1) } : null
-  //     )
-  //     .filter((item) => item !== null);
-  // }
 
   public start(callback: () => void): void {
     this.server.listen(this.serverOptions.port, callback);

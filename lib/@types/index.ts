@@ -46,8 +46,14 @@ export type ServerOptions = {
   logRequests?: boolean;
 };
 
-/** The definitions of a route */
+/** The definition of a route */
 export type RouteDefinition = {
+  root: string;
+  route: ConsumeRoute;
+};
+
+/** The definitions of an endpoint */
+export type EndpointDefinition = {
   endpoint: string;
   method: HttpMethod;
   controller: Controller;
@@ -84,16 +90,13 @@ export interface ConsumeServer {
   use(middleware: Middleware): void;
 
   /**
-   * TODO:
-   * Implement a Route type that will act as a stripped
-   * down version of the ConsumerServer allowing the addition of
-   * endpoints and middleware
-   *
-   * Possible instead abstract all of this logic out to routes
-   * and have the server send all requests down a 'default' route
-   * @param root
+   * Adds a the endpoints that a route is responsible for to the
+   * primary endpoint list, this is because routes are simply a
+   * developer helper to group endpoints
+   * @param {string} root The root of the route
+   * @param {ConsumeRoute} route The route to add
    */
-  route(root: string): void;
+  route(root: string, route: ConsumeRoute): void;
 
   /**
    * Define a handler for GET requests to a specific endpoint
@@ -131,6 +134,44 @@ export interface ConsumeServer {
    * @param {void} callback The callback function
    */
   start(callback?: () => void): void;
+}
+
+export interface ConsumeRoute {
+  /**
+   * Define a handler for GET requests to a specific endpoint
+   * @param {string} endpoint The endpoint for which the handler is defined
+   * @param {Middleware} preflight A personal preflight for this endpoint
+   * @param {Controller} controller The function to handle the GET request
+   */
+  get(endpoint: string, preflight: Middleware, controller: Controller): void;
+
+  /**
+   * Define a handler for GET requests to a specific endpoint
+   * @param {string} endpoint The endpoint for which the handler is defined
+   * @param {Controller} controller The function to handle the GET request
+   */
+  get(endpoint: string, controller: Controller): void;
+
+  /**
+   * Define a handler for POST requests to a specific endpoint
+   * @param {string} endpoint The endpoint for which the handler is defined
+   * @param {Middleware} preflight A personal preflight for this endpoint
+   * @param {Controller} controller The function to handle the POST request
+   */
+  post(endpoint: string, preflight: Middleware, controller: Controller): void;
+
+  /**
+   * Define a handler for POST requests to a specific endpoint
+   * @param {string} endpoint The endpoint for which the handler is defined
+   * @param {Controller} controller The function to handle the POST request
+   */
+  post(endpoint: string, controller: Controller): void;
+
+  /**
+   * Returns the endpoints defined in this Route instance
+   * @returns {EndpointDefinition[]} The routes
+   */
+  getRoutes(): EndpointDefinition[];
 }
 
 /**

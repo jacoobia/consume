@@ -1,5 +1,9 @@
 # Consume
 
+> :warning: **This is not a production ready package!** This is in no way a production ready product and is simply just a personal learning/exploratory project. Use at your own risk!
+
+With that being said, if you want to contribute to the project, feel free to open issues and/or PRs :)
+
 This is an exploratory project to build my own REST app library to consume endpoint requests.
 The project is essentially a big wrapper for the [NodeJS HTTP Library](https://nodejs.org/api/http.html#class-httpserverresponse), it supplies a similar developer experience to that of express with a sprinkle of a few extras.
 
