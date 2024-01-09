@@ -2,6 +2,8 @@
 
 > :warning: **This is not a production ready package!** This is in no way a production ready product and is simply just a personal learning/exploratory project. Use at your own risk!
 
+The developmer experience of this wrapper library takes big big big inspiration from [ExpressJS](https://expressjs.com/), which I love and use often.
+
 With that being said, if you want to contribute to the project, feel free to open issues and/or PRs :)
 
 This is an exploratory project to build my own REST app library to consume endpoint requests.

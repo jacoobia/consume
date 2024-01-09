@@ -4,16 +4,18 @@
     "module": "commonjs",
     "outDir": "./dist",                          
     "rootDir": "./",
+    "typeRoots": ["./node_modules/@types", "./src/@types"],
     "sourceMap": true,
     "noImplicitAny": true,
     "declaration": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true
   },
   "include": [
     "./",
   ],
   "exclude": [
-    "node_modules",
+    "node_modules", "./dist"
   ]
 }
