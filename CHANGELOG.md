@@ -1,5 +1,12 @@
 # consume
 
+## 0.1.2
+
+### Patch Changes
+
+- c032193: rename to consumejs
+- 2eb760b: rename
+
 ## 0.1.1
 
 ### Patch Changes
