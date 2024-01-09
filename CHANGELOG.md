@@ -1,5 +1,11 @@
 # consume
 
+## 0.2.0
+
+### Minor Changes
+
+- ffdb5dc: separation of concerns and differentiate between endpoints with url params and without
+
 ## 0.1.2
 
 ### Patch Changes
