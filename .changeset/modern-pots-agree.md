@@ -1,0 +1,5 @@
+---
+"consume": patch
+---
+
+unrestrict
