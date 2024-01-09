@@ -7,6 +7,10 @@ export const getUsers = (): User[] => {
   return users;
 };
 
+export const getUserById = (id: string) => {
+  return users.find((user: User) => user.id === id);
+};
+
 export const addUser = (user: User): boolean => {
   if (exists(user)) return false;
   users.push({

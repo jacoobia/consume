@@ -10,12 +10,12 @@ import {
   NumberValidator
 } from '../dist';
 import { User } from './@types';
-import { addUser, getUsers } from './service/userService';
+import { addUser, getUserById, getUsers } from './service/userService';
 
 const server: ConsumeServer = createServer({
   port: 3000,
   useSecureHeaders: true,
-  logRequests: false
+  logRequests: true
 });
 
 const validation: Middleware = validator({
@@ -27,6 +27,18 @@ const validation: Middleware = validator({
 server.get('/users', (request: Request, response: Response) => {
   const users: User[] = getUsers();
   response.reply(StatusCodes.Ok, { users });
+});
+
+server.get('/users/:id', (request: Request, response: Response) => {
+  const { id } = request.parseUrlParams<{ id: string }>();
+  const user: User = getUserById(id);
+  response.reply(StatusCodes.Ok, { user });
+});
+
+server.get('/users/:id/age', (request: Request, response: Response) => {
+  const { id } = request.parseUrlParams<{ id: string }>();
+  const user: User = getUserById(id);
+  response.reply(StatusCodes.Ok, { [user.firstname]: user.age });
 });
 
 server.post('/addUser', validation, (request: Request, response: Response) => {

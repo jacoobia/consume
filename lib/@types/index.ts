@@ -84,6 +84,18 @@ export interface ConsumeServer {
   use(middleware: Middleware): void;
 
   /**
+   * TODO:
+   * Implement a Route type that will act as a stripped
+   * down version of the ConsumerServer allowing the addition of
+   * endpoints and middleware
+   *
+   * Possible instead abstract all of this logic out to routes
+   * and have the server send all requests down a 'default' route
+   * @param root
+   */
+  route(root: string): void;
+
+  /**
    * Define a handler for GET requests to a specific endpoint
    * @param {string} endpoint The endpoint for which the handler is defined
    * @param {Middleware} preflight A personal preflight for this endpoint

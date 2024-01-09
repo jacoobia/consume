@@ -44,12 +44,12 @@ class Server implements ConsumeServer {
    * Wrap the request and response with the easy-use Consumer API wrapped,
    * run the middleware process and process down the pipeline to the target
    * function
-   * @param {http.IncomingMessage} request the incoming request
-   * @param {http.ServerResponse} response the outgoing response
+   * @param {http.IncomingMessage} request The incoming request
+   * @param {http.ServerResponse} response The outgoing response
    */
   private handleRequest(request: http.IncomingMessage, response: http.ServerResponse): void {
-    const method: string = request.method!; //TODO: Read any url params and store them in the request wrapper
-    const url: string = request.url!.split('?')[0]; // Gross inline string manipiulation to account for url?query=params
+    const method: string = request.method!;
+    const url: string = request.url!.split('?')[0];
 
     const wrappedRequest: Request = new ConsumeRequest(request, this.serverOptions.logRequests);
     const wrappedResponse: Response = new ConsumeResponse(response);
@@ -60,14 +60,14 @@ class Server implements ConsumeServer {
       }
 
       for (const route of this.routes) {
-        if (route.endpoint === url) {
-          if (route.method === method) {
-            this.runMiddleware(0, wrappedRequest, wrappedResponse, route);
-            return;
-          } else {
-            this.methodMismatchRejection(url, method, route.method, wrappedResponse);
-            return;
-          }
+        const { isMatch, params } = this.matchRoute(url, route.endpoint);
+        if (isMatch && route.method === method) {
+          wrappedRequest.urlParams = params;
+          this.runMiddleware(0, wrappedRequest, wrappedResponse, route);
+          return;
+        } else if (isMatch) {
+          this.methodMismatchRejection(url, method, route.method, wrappedResponse);
+          return;
         }
       }
 
@@ -76,9 +76,41 @@ class Server implements ConsumeServer {
   }
 
   /**
+   * Uses ad route definition endpoint pattern to
+   * such as /users/:id/profile to match an incoming
+   * request and extract any tokens
+   * @param {string} requestedUrl The url from the request
+   * @param {string} routePattern The route pattern
+   * @returns
+   */
+  private matchRoute(
+    requestedUrl: string,
+    routePattern: string
+  ): { isMatch: boolean; params: { [key: string]: string } } {
+    const requestedParts = requestedUrl.split('/');
+    const patternParts = routePattern.split('/');
+    const params: { [key: string]: string } = {};
+
+    if (requestedParts.length !== patternParts.length) {
+      return { isMatch: false, params };
+    }
+
+    for (let i = 0; i < patternParts.length; i++) {
+      if (patternParts[i].startsWith(':')) {
+        const paramName = patternParts[i].substring(1);
+        params[paramName] = requestedParts[i];
+      } else if (requestedParts[i] !== patternParts[i]) {
+        return { isMatch: false, params };
+      }
+    }
+
+    return { isMatch: true, params };
+  }
+
+  /**
    * Recursively runs through the available middlewares and chain executes them,
    * then finally passes it onto the controller
-   * @param {number} index the index of the middleware to run
+   * @param {number} index The index of the middleware to run
    * @param {Request} request The incoming incoming
    * @param {Response} response The wrapped response
    * @param {RouteDefinition} route The route definition to forward the request onto
@@ -132,10 +164,6 @@ class Server implements ConsumeServer {
     );
   }
 
-  private stripUrlParam() {
-    //TODO:
-  }
-
   public use(middleware: Middleware): void {
     this.middleware.push(middleware);
   }
@@ -168,23 +196,20 @@ class Server implements ConsumeServer {
     });
   }
 
-  // public get(endpoint: string, preflightOrController: Middleware | Controller, controller?: Controller): void {
-  //   let preflight: Middleware | undefined;
-  //   this.routes.push({
-  //     method: 'GET',
-  //     endpoint,
-  //     controller,
-  //     preflight
-  //   });
-  // }
-
-  // public post(endpoint: string, preflight: Middleware = null, controller: Controller): void {
-  //   this.routes.push({
-  //     method: 'POST',
-  //     endpoint,
-  //     controller,
-  //     preflight
-  //   });
+  // DEPRECATED/REDACTED
+  // /**
+  //  * Extracts the URL param tokens which dictate where
+  //  * inline url params are
+  //  * @param endpoint
+  //  * @returns
+  //  */
+  // private extractUrlTokens(endpoint: string): UrlParamToken[] {
+  //   const parts: string[] = endpoint.split('/');
+  //   return parts
+  //     .map((part, index) =>
+  //       part.startsWith(':') ? { index: index, token: part.substring(1) } : null
+  //     )
+  //     .filter((item) => item !== null);
   // }
 
   public start(callback: () => void): void {
