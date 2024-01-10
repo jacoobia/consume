@@ -10,15 +10,7 @@ With that being said, if you want to contribute to the project, feel free to ope
 This is an exploratory project to build my own REST app library to consume endpoint requests.
 The project is essentially a big wrapper for the [NodeJS HTTP Library](https://nodejs.org/api/http.html#class-httpserverresponse), it supplies a similar developer experience to that of express with a sprinkle of a few extras.
 
-## Goals
-
-### Outline
-
-- Full type definition support
-- Easy/clear developer experience
-- Fast and bloat-free
-
-### To-do
+## To-do
 
 - ~~Consume HTTP requests~~
 - ~~Option to populate some default security headers~~
