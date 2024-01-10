@@ -8,7 +8,8 @@ import {
   ValidatorError,
   ValidatorFunction,
   ElementValidator,
-  ValidatorOptions
+  ValidatorOptions,
+  StatusCodes
 } from '../../@types';
 
 /**
@@ -37,11 +38,11 @@ export const NumberValidator = createValidator((object) => typeof object === 'nu
 export const BooleanValidator = createValidator((object) => typeof object === 'boolean');
 
 const extractPayload = (request: Request): UrlParams | RequestBody => {
-  if (Object.keys(request.body).length > 0) {
+  if (request.body && Object.keys(request.body).length > 0) {
     return request.body;
-  } else if (Object.keys(request.urlParams).length > 0) {
+  } else if (request.urlParams && Object.keys(request.urlParams).length > 0) {
     return request.urlParams;
-  } else if (Object.keys(request.searchParams).length > 0) {
+  } else if (request.searchParams && Object.keys(request.searchParams).length > 0) {
     return request.searchParams;
   } else {
     return null;
@@ -90,7 +91,7 @@ export const validator = (
 
     if (Object.keys(errors).length) {
       const errorResponseKey = options?.errorListName ? options.errorListName : 'errors';
-      return response.reply(400, { [errorResponseKey]: errors });
+      return response.reply(StatusCodes.BadRequest, { [errorResponseKey]: errors });
     }
 
     controller(request, response);

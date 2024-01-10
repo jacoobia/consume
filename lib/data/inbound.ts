@@ -59,6 +59,11 @@ export const parseBody = (request: http.IncomingMessage): Promise<RequestBody> =
  * @returns {UrlParamMatch} The result of the match attempt
  */
 export const parseUrlTokens = (requestedUrl: string, routePattern: string): UrlParamMatch => {
+  // Reject no-token patterns instantlly
+  if (!routePattern.includes('/:')) {
+    return { isMatch: false, params: {} };
+  }
+
   const urlSegments = requestedUrl.split('/');
   const patternSegments = routePattern.split('/');
 

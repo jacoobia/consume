@@ -13,10 +13,16 @@
     "release": "pnpm run build && changeset publish",
     "prepare": "husky install",
     "pre-commit": "lint-staged",
-    "lint": "eslint \"**/*.ts\""
+    "lint": "eslint \"**/*.ts\"",
+    "test": "jest"
   },
   "lint-staged": {
     "lib/**/*.ts": [
+      "prettier --write",
+      "eslint \"**/*.ts\"",
+      "jest"
+    ],
+    "__tests__/**/*.test.ts": [
       "prettier --write",
       "eslint \"**/*.ts\""
     ]
