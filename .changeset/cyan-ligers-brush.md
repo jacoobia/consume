@@ -1,5 +1,0 @@
----
-"consumejs": patch
----
-
-readme fix

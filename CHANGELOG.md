@@ -1,5 +1,11 @@
 # consume
 
+## 0.2.3
+
+### Patch Changes
+
+- 486dcf4: readme fix
+
 ## 0.2.2
 
 ### Patch Changes
