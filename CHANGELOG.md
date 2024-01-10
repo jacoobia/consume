@@ -1,5 +1,11 @@
 # consume
 
+## 0.2.2
+
+### Patch Changes
+
+- b38f299: added test workflow and updated readme
+
 ## 0.2.1
 
 ### Patch Changes
