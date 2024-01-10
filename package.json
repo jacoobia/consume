@@ -1,6 +1,6 @@
 {
   "name": "consumejs",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A simple exploratorty wrapper for the NodeJS http library built in TypeScript",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
