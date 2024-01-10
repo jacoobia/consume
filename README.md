@@ -32,24 +32,24 @@ The project is essentially a big wrapper for the [NodeJS HTTP Library](https://n
 
 ## :clipboard: To-do
 
-:white_check_mark: ~~Consume basic HTTP requests~~
-:white_check_mark: ~~Option to populate some default security headers~~
-:white_check_mark: ~~Request (http.IncomingMessage) wrapper with a simple api~~
-:white_check_mark: ~~Response (http.ServerResponse) wrapper with a simple api~~
-:white_square_button: Support different body formats in and out (currently just JSON or plain text)
-:white_check_mark: ~~In-built scheme validation (can leverage the same method as my [SchemeIt library](https://github.com/jacoobia/schemeit))~~
-:white_square_button: In-built Rate limiting
-:white_check_mark: ~~Middlewares (optionally define them before the controller in the meth functions like ExpressJS)~~
-:white_square_button: Sending files in responses not just data
-:white_check_mark: ~~Root 'routes' allowing logical breakdown of disciplines by files~~
-:white_check_mark: ~~Body data~~
-:white_check_mark: ~~Search params i.e /example?foo=bar~~
-:white_check_mark: ~~URL params i.e /example/:id/profile~~
-:white_square_button: Client cache validation
-:white_square_button: Surface cookies
-:white_square_button: Validate if requests are secure (using https, which uses the TLS protocol)
-:white_check_mark: ~~Header manipulations~~
-:white_square_button: Support for other HTTP request methods besides GET & POST
+- :white_check_mark: ~~Consume basic HTTP requests~~
+- :white_check_mark: ~~Option to populate some default security headers~~
+- :white_check_mark: ~~Request (http.IncomingMessage) wrapper with a simple api~~
+- :white_check_mark: ~~Response (http.ServerResponse) wrapper with a simple api~~
+- :white_square_button: Support different body formats in and out (currently just JSON or plain text)
+- :white_check_mark: ~~In-built scheme validation (can leverage the same method as my [SchemeIt library](https://github.com/jacoobia/ - schemeit))~~
+- :white_square_button: In-built Rate limiting
+- :white_check_mark: ~~Middlewares (optionally define them before the controller in the meth functions like ExpressJS)~~
+- :white_square_button: Sending files in responses not just data
+- :white_check_mark: ~~Root 'routes' allowing logical breakdown of disciplines by files~~
+- :white_check_mark: ~~Body data~~
+- :white_check_mark: ~~Search params i.e /example?foo=bar~~
+- :white_check_mark: ~~URL params i.e /example/:id/profile~~
+- :white_square_button: Client cache validation
+- :white_square_button: Surface cookies
+- :white_square_button: Validate if requests are secure (using https, which uses the TLS protocol)
+- :white_check_mark: ~~Header manipulations~~
+- :white_square_button: Support for other HTTP request methods besides GET & POST
 
 ---
 
