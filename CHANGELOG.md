@@ -1,5 +1,11 @@
 # consume
 
+## 0.2.1
+
+### Patch Changes
+
+- 8b274c0: testing
+
 ## 0.2.0
 
 ### Minor Changes
