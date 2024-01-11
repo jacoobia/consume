@@ -37,7 +37,7 @@ The project is essentially a big wrapper for the [NodeJS HTTP Library](https://n
 - :white_check_mark: ~~Request (http.IncomingMessage) wrapper with a simple api~~
 - :white_check_mark: ~~Response (http.ServerResponse) wrapper with a simple api~~
 - :white_square_button: Support different body formats in and out (currently just JSON or plain text)
-- :white_check_mark: ~~In-built scheme validation (can leverage the same method as my [SchemeIt library](https://github.com/jacoobia/ - schemeit))~~
+- :white_check_mark: ~~In-built scheme validation (can leverage the same method as my [SchemeIt library](https://github.com/jacoobia/schemeit))~~
 - :white_square_button: In-built Rate limiting
 - :white_check_mark: ~~Middlewares (optionally define them before the controller in the meth functions like ExpressJS)~~
 - :white_square_button: Sending files in responses not just data
