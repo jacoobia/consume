@@ -17,14 +17,10 @@
     "test": "jest"
   },
   "lint-staged": {
-    "lib/**/*.ts": [
+    "{lib,__tests__}/**/*.ts": [
       "prettier --write",
-      "eslint \"**/*.ts\"",
-      "jest"
-    ],
-    "__tests__/**/*.test.ts": [
-      "prettier --write",
-      "eslint \"**/*.ts\""
+      "eslint --fix",
+      "jest --findRelatedTests"
     ]
   },
   "keywords": [],

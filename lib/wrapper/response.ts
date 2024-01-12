@@ -1,11 +1,18 @@
 import * as http from 'http';
-import { Response, StatusCodes } from '../@types';
+import { CookieOptions, Response, StatusCodes } from '../@types';
+import { buildCookie } from '../util/http';
 
 class ConsumeResponse implements Response {
   private response: http.ServerResponse;
 
   constructor(response: http.ServerResponse) {
     this.response = response;
+  }
+
+  public setCookie(name: string, value: string, options: CookieOptions): void {
+    const cookieKey = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
+    const cookie = buildCookie(cookieKey, options);
+    this.setHeader('Set-Cookie', cookie);
   }
 
   public forbidden(reason: string = 'Forbidden request'): void {

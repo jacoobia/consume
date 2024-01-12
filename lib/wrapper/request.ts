@@ -59,6 +59,28 @@ class ConsumeRequest implements Request {
     }
   }
 
+  public getCookie(name: string): string {
+    const cookies = this.request.headers.cookie;
+    if (!cookies) return undefined;
+
+    const cookieValue = cookies.split(';').find((cookie) => cookie.trim().startsWith(`${name}=`));
+    return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : undefined;
+  }
+
+  public getAllCookies(): Record<string, string> {
+    const cookies = this.request.headers.cookie;
+    const cookiesObj: Record<string, string> = {};
+
+    if (cookies) {
+      cookies.split(';').forEach((cookie) => {
+        const [name, value] = cookie.split('=').map((c) => c.trim());
+        cookiesObj[decodeURIComponent(name)] = decodeURIComponent(value);
+      });
+    }
+
+    return cookiesObj;
+  }
+
   public fullUrl(): string {
     const url: string | undefined = this.request.url;
     const req: http.IncomingMessage = this.request;

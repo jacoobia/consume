@@ -13,6 +13,8 @@ const userRoute: ConsumeRoute = createRoute();
  */
 userRoute.get('', (request: Request, response: Response) => {
   const users: User[] = getUsers();
+  console.log(request.getAllCookies());
+  response.setCookie('test', 'test', { secure: true });
   response.reply(StatusCodes.Ok, { users });
 });
 

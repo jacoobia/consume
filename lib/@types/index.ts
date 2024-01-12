@@ -1,3 +1,5 @@
+export type Primitive = string | number | boolean;
+
 /** Possible header types */
 export type Header = string | number | string[];
 
@@ -80,6 +82,15 @@ export type ValidatorFunction = (() => ElementValidator) & { optional: () => Ele
 
 /** Validation error response */
 export type ValidatorError = Record<string, string>;
+
+export type CookieOptions = {
+  expires?: Date;
+  httpOnly?: boolean;
+  secure?: boolean;
+  path?: string;
+  domain?: string;
+  sameSite?: 'Strict' | 'Lax' | 'None';
+};
 
 /**
  * A ConsumeServer
@@ -195,6 +206,14 @@ export interface Response {
   forbidden(reason?: string): void;
 
   /**
+   * Sets a cookie for a http response for a client
+   * @param {string} name The name of the cookie
+   * @param {string} value The value of the cookie
+   * @param {CookieOptions} options The options for the cookie
+   */
+  setCookie(name: string, value: string, options: CookieOptions): void;
+
+  /**
    * Set a header for a http response for a client
    * @param {string} name The name of the header
    * @param {Header} value The value to set the header to
@@ -221,27 +240,45 @@ export interface Request {
 
   /**
    * Parses the body to a T type
+   * @returns {T} The parsed body
    */
   parseBody<T>(): T;
 
   /**
    * Parses the URL params to a T type
+   * @returns {T} The parsed URL params
    */
   parseUrlParams<T>(): T;
 
   /**
    * Parses the search params to a T type
+   * @returns {T} The parsed search params
    */
   parseSearchParams<T>(): T;
 
   /**
    * Internal use only
    * Parses the request data (body, query, param etc)
+   * @returns {Promise<boolean>} Whether the request was parsed successfully
    */
   parse(): Promise<boolean>;
 
   /**
-   * Returns the full URL including the host
+   * Gets a cookie from the request
+   * @param {string} name The name of the cookie to get
+   * @returns {string | undefined} The cookie value or undefined if not found
+   */
+  getCookie(name: string): string | undefined;
+
+  /**
+   * Gets all cookies from the request
+   * @returns {Record<string, string>} The cookies as <key, value> pairs
+   */
+  getAllCookies(): Record<string, string>;
+
+  /**
+   * Gets the full URL of the request
+   * @returns {string} The full URL
    */
   fullUrl(): string;
 }

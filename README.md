@@ -46,7 +46,8 @@ The project is essentially a big wrapper for the [NodeJS HTTP Library](https://n
 - :white_check_mark: ~~Search params i.e /example?foo=bar~~
 - :white_check_mark: ~~URL params i.e /example/:id/profile~~
 - :white_square_button: Client cache validation
-- :white_square_button: Surface cookies
+- ~~:white_check_mark: Read request cookies~~
+- ~~:white_check_mark: Write response cookies~~
 - :white_square_button: Validate if requests are secure (using https, which uses the TLS protocol)
 - :white_check_mark: ~~Header manipulations~~
 - :white_square_button: Support for other HTTP request methods besides GET & POST
@@ -106,6 +107,8 @@ Querying `localhost:3000/example` would yield the following result:
 **:heavy_exclamation_mark: The project is setup using PNPM, to switch to your preferred package manager delete `pnpm-lock.yaml` and reinstall.**
 
 ### Installing Dependencies
+
+This project enforces Unix style line-endings (LF), this can be an issue if you're working on a windows machine as the lint-staged pre-commit phase will enforce the CRLF line endings. You can disable autoCrlf like so: `git config --global core.autocrlf false`
 
 Once the project is cloned, simply install all of the dependencies
 
