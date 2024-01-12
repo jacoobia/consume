@@ -69,6 +69,7 @@ export type EndpointDefinition = {
 export type ElementValidator = {
   validate: (object: unknown) => boolean;
   optional?: boolean;
+  message?: string;
 };
 
 /** Options for validators */
@@ -77,7 +78,7 @@ export type ValidatorOptions = {
   errorListName?: string;
 };
 
-/** A validation functopn */
+/** A validation function */
 export type ValidatorFunction = (() => ElementValidator) & { optional: () => ElementValidator };
 
 /** Validation error response */

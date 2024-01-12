@@ -18,24 +18,46 @@ import {
  * @param validateFunc The validator function
  * @returns {ValidatorFunction} validator function
  */
-export const objectValidator = (validateFunc: (object: unknown) => boolean): ValidatorFunction => {
-  const validatorFunc = (): ElementValidator => ({ validate: validateFunc, optional: false });
-  validatorFunc.optional = (): ElementValidator => ({ validate: validateFunc, optional: true });
+export const objectValidator = (
+  validateFunc: (object: unknown) => boolean,
+  errorMessage?: string
+): ValidatorFunction => {
+  const validatorFunc = (): ElementValidator => ({
+    validate: (object) => validateFunc(object),
+    message: errorMessage,
+    optional: false
+  });
+
+  validatorFunc.optional = (): ElementValidator => ({
+    validate: (object) => object === undefined || validateFunc(object),
+    message: errorMessage,
+    optional: true
+  });
+
   return validatorFunc;
 };
 
 /**
  * Default validator, validates a string
  */
-export const StringValidator = objectValidator((object) => typeof object === 'string');
+export const StringValidator = objectValidator(
+  (object) => typeof object === 'string',
+  'Invalid type, expected a string'
+);
 /**
  * Default validator, validates a number
  */
-export const NumberValidator = objectValidator((object) => typeof object === 'number');
+export const NumberValidator = objectValidator(
+  (object) => typeof object === 'number',
+  'Invalid type, expected a number'
+);
 /**
  * Default validator, validates a boolean
  */
-export const BooleanValidator = objectValidator((object) => typeof object === 'boolean');
+export const BooleanValidator = objectValidator(
+  (object) => typeof object === 'boolean',
+  'Invalid type, expected a boolean'
+);
 
 const extractPayload = (request: Request): UrlParams | RequestBody => {
   if (request.body && Object.keys(request.body).length > 0) {
@@ -74,7 +96,7 @@ export const createValidator = (
             errors[key] = 'Required element is missing or undefined';
           }
         } else if (!validator.validate(value)) {
-          errors[key] = 'Invalid type: expected';
+          errors[key] = validator.message ?? 'Invalid type';
         }
       }
     } else {

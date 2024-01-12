@@ -68,7 +68,7 @@ describe('validator', () => {
     middleware(mockRequest, mockResponse, mockController);
 
     expect(mockResponse.reply).toHaveBeenCalledWith(400, {
-      errors: { foo: 'Invalid type: expected' }
+      errors: { foo: 'Invalid type, expected a number' }
     });
   });
 
