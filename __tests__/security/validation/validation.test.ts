@@ -1,14 +1,14 @@
 import {
   Request,
   Response,
-  validator,
-  ValidatorFunction,
   createValidator,
+  ValidatorFunction,
+  objectValidator,
   StatusCodes,
   NumberValidator
 } from '../../../lib';
 
-const mockValidator: ValidatorFunction = createValidator((object: unknown) => object === 'test');
+const mockValidator: ValidatorFunction = objectValidator((object: unknown) => object === 'test');
 
 describe('validator', () => {
   const mockRequest = {} as Request;
@@ -32,7 +32,7 @@ describe('validator', () => {
       bar: 123
     };
 
-    const middleware = validator(validators);
+    const middleware = createValidator(validators);
     middleware(mockRequest, mockResponse, mockController);
 
     expect(mockController).toHaveBeenCalledWith(mockRequest, mockResponse);
@@ -49,7 +49,7 @@ describe('validator', () => {
       //bar: 123
     };
 
-    const middleware = validator(validators);
+    const middleware = createValidator(validators);
     middleware(mockRequest, mockResponse, mockController);
 
     expect(mockController).toHaveBeenCalledWith(mockRequest, mockResponse);
@@ -64,7 +64,7 @@ describe('validator', () => {
       foo: '1234lol'
     };
 
-    const middleware = validator(validators);
+    const middleware = createValidator(validators);
     middleware(mockRequest, mockResponse, mockController);
 
     expect(mockResponse.reply).toHaveBeenCalledWith(400, {
@@ -79,7 +79,7 @@ describe('validator', () => {
 
     mockRequest.body = {};
 
-    const middleware = validator(validators);
+    const middleware = createValidator(validators);
     middleware(mockRequest, mockResponse, mockController);
 
     expect(mockResponse.reply).toHaveBeenCalledWith(StatusCodes.BadRequest, {
@@ -94,7 +94,7 @@ describe('validator', () => {
 
     mockRequest.body = { foo: 'test', bar: 'test' };
 
-    const validationMiddleware = validator(validators, { noExtraElements: true });
+    const validationMiddleware = createValidator(validators, { noExtraElements: true });
     validationMiddleware(mockRequest, mockResponse, mockController);
 
     expect(mockResponse.reply).toHaveBeenCalledWith(StatusCodes.BadRequest, {
