@@ -1,5 +1,11 @@
 # consume
 
+## 0.3.0
+
+### Minor Changes
+
+- 31bd4b3: Added reading and writing of cookies
+
 ## 0.2.3
 
 ### Patch Changes
