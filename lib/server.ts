@@ -10,7 +10,7 @@ import {
   Request,
   StatusCodes,
   ConsumeRoute
-} from './@types/index';
+} from './@types';
 import ConsumeRequest from './wrapper/request';
 import security from './security/securityMiddleware';
 import { isMiddleware } from './util/function';
