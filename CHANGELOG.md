@@ -1,5 +1,12 @@
 # consume
 
+## 0.3.1
+
+### Patch Changes
+
+- f14dd22: renamed validator functions to be more consistent with the lib
+- 3de3a70: update validator to allow for error messages (matching schemeit)
+
 ## 0.3.0
 
 ### Minor Changes
