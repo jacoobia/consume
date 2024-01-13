@@ -1,6 +1,6 @@
 # Consume
 
-> :warning:<br> > **This is not a production ready package!** <br>
+> :warning:<br> **This is not a production ready package!** <br>
 > This is in no way a production ready product and is simply just a personal learning/exploratory project. Use at your own risk!
 
 - [:globe_with_meridians: Consume](#consume)
