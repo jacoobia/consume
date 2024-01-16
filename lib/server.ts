@@ -1,5 +1,7 @@
 import * as http from 'http';
 import ConsumeResponse from './wrapper/response';
+import ConsumeRequest from './wrapper/request';
+import security from './security/securityMiddleware';
 import {
   ConsumeServer,
   Controller,
@@ -11,8 +13,6 @@ import {
   StatusCodes,
   ConsumeRoute
 } from './@types';
-import ConsumeRequest from './wrapper/request';
-import security from './security/securityMiddleware';
 import { isMiddleware } from './util/function';
 import { parseUrlTokens } from './data/inbound';
 

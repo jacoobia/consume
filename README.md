@@ -51,6 +51,8 @@ The project is essentially a big wrapper for the [NodeJS HTTP Library](https://n
 - :white_square_button: Validate if requests are secure (using https, which uses the TLS protocol)
 - :white_check_mark: ~~Header manipulations~~
 - :white_square_button: Support for other HTTP request methods besides GET & POST
+- :white_square_button: Add request forwarding
+- :white_square_button: Figure out how to support GraphQL
 
 ---
 
